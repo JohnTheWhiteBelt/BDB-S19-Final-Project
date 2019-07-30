@@ -29,18 +29,21 @@ App = {
     }
     web3 = new Web3(App.web3Provider);
 
-    return App.initContract();
+    return await App.initContract();
   },
 
-  initContract: function () {
+  initContract: function  () {
     $.getJSON('ProofOfExistence.json', function (data) {
       // Get the necessary contract artifact file and instantiate it with truffle-contract
       var ProofOfExistenceArtifact = data;
-      App.contracts.ProofOfExistence = TruffleContract(ProofOfExistenceArtifact);
-
-      // Set the provider for our contract
-      App.contracts.ProofOfExistence.setProvider(App.web3Provider);
-
+      web3.eth.net.getId().then(networkId => {
+        const deployedAddress = ProofOfExistenceArtifact.networks[networkId].address
+        App.contracts.ProofOfExistence = new web3.eth.Contract(ProofOfExistenceArtifact.abi,deployedAddress);
+  
+        // Set the provider for our contract
+        App.contracts.ProofOfExistence.setProvider(App.web3Provider);
+        App.subscribeEthEvents();
+      });
     });
 
     return App.bindEvents();
@@ -50,6 +53,8 @@ App = {
     $('#fileUpload').on('change', App.handleFiles);
     $('#notarize').on('click', App.notarize);
     $('#verify').on('click', App.verify);
+    App.updateCurrentAccount();
+    
   },
 
   handleFiles: function (event) {
@@ -74,52 +79,105 @@ App = {
 
   notarize: function() {
 
-    var proofOfExistenceInstance;
+    // var proofOfExistenceInstance;
 
-    web3.eth.getAccounts(function(error, accounts) {
-      if (error) {
-        console.log(error);
-      }
+    // web3.eth.getAccounts(function(error, accounts) {
+    //   if (error) {
+    //     console.log(error);
+    //   }
     
-      var account = accounts[0];
+    //   var account = accounts[0];
     
-      App.contracts.ProofOfExistence.deployed().then(function(instance) {
-        proofOfExistenceInstance = instance;
-        return proofOfExistenceInstance.notarize(App.currentDocument, {from: account});
-      }).then(function(result) {
-        return alert("Done!");
-      }).catch(function(err) {
-        console.log(err.message);
-      });
-    });
+    //   App.contracts.ProofOfExistence.deployed().then(function(instance) {
+    //     proofOfExistenceInstance = instance;
+    //     return proofOfExistenceInstance.notarize(App.currentDocument, {from: account});
+    //   }).then(function(result) {
+    //     return alert("Done!");
+    //   }).catch(function(err) {
+    //     console.log(err.message);
+    //   });
+
+      App.contracts.ProofOfExistence.methods.notarize(App.currentDocument).send({
+        from: web3.eth.defaultAccount
+      }).then(
+        result => {
+          return alert("Done!");
+        }, 
+        error => {
+          console.log(error);
+        });
+    // });
   },
 
   verify: function() {
 
-    var proofOfExistenceInstance;
+    // var proofOfExistenceInstance;
 
-    web3.eth.getAccounts(function(error, accounts) {
-      if (error) {
-        console.log(error);
-      }
+    // web3.eth.getAccounts(function(error, accounts) {
+    //   if (error) {
+    //     console.log(error);
+    //   }
     
-      var account = accounts[0];
+    //   var account = accounts[0];
     
-      App.contracts.ProofOfExistence.deployed().then(function(instance) {
-        proofOfExistenceInstance = instance;
-        return proofOfExistenceInstance.verify(App.currentDocument, {from: account});
-      }).then(function(result) {
-        if(result === true){
-          return alert("Has Notorization");
-        }else {
-          return alert("Not Notorized");
+      App.contracts.ProofOfExistence.methods.verify(App.currentDocument).call().then(
+        result => {
+          if(result === true){
+            return alert("Has Notorization");
+          }else {
+            return alert("Not Notorized");
+          }
+        }, 
+        error => {
+          console.log(error);
+        });
+    // });
+  },
+
+  updateCurrentAccount: function() {
+    web3.eth.getAccounts().then(acounts =>  {
+      web3.eth.defaultAccount = acounts[0];
+      $('#currentAccount').text(acounts[0]);
+    });
+    setTimeout(App.updateCurrentAccount, 5000);
+  },
+
+  subscribeEthEvents: function() {
+    // var options = {
+    //   address: App.contracts.ProofOfExistence._address
+    // };
+    // var subscription = web3.eth.subscribe('logs', options, function(error, result){
+    //   if(error || result == null){
+    //     // Notarized
+    //       console.log('Error when watching incoming transactions: ', error.message);
+    //       return;
+    //   }
+    //   console.log('Got something back: ', result);
+    // });
+    // subscription.on('data', function(log){
+    //     console.log(log);
+    // });
+    const eventJsonInterface = web3.utils._.find(
+      App.contracts.ProofOfExistence._jsonInterface,
+      o => o.name === 'Notarized' && o.type === 'event',
+    )
+
+    const subscription = web3.eth.subscribe('logs', {
+      address: App.contracts.ProofOfExistence._address,
+      topics: [eventJsonInterface.signature]
+    }, (error, result) => {
+        if (!error) {
+          const eventObj = web3.eth.abi.decodeLog(
+              eventJsonInterface.inputs,
+              result.data,
+              result.topics.slice(1)
+            )
+          alert('New Notarization, Owner: ' + eventObj.owner + ' Proof: ' + eventObj.proof);
         }
-      }).catch(function(err) {
-        console.log(err.message);
-      });
+  
+  
     });
   }
-
 };
 
 $(function () {
