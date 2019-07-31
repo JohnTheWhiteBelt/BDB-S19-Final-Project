@@ -19,7 +19,8 @@ contract ProofOfExistence is Ownable {
     */
   event Unpaused(address account);
 
-  event Notarized(address indexed owner, bytes32 indexed proof);
+  event Notarized(address indexed owner, bytes32 indexed proof, uint time,
+  string name, bytes32 tags, uint size, bytes32 contentType);
 
   bool private _paused;
 
@@ -27,7 +28,19 @@ contract ProofOfExistence is Ownable {
   /// @dev hash size is fixed to bytes32
   /// @param rings The number of rings from dendrochronological sample
   /// @return age in years, rounded up for partial years
-  mapping (bytes32 => bool) public proofs;
+  struct DocInfo {
+    string name;
+    bytes32 tags;
+    uint time;
+    uint size;
+    bytes32 contentType;
+    address creator;
+  }
+  // mapping (bytes32 => bool) public proofs;
+
+  mapping (bytes32 => DocInfo) public proofDocInfo;
+
+  mapping (address => bytes32[]) public acountProofs;
 
   constructor () public {
       _paused = false;
@@ -76,22 +89,40 @@ contract ProofOfExistence is Ownable {
   /// @notice store a proof/hash
   /// @dev hash size is fixed to bytes32
   /// @param proof The bytes32 hash
-  function storeProof(bytes32 proof)
-  internal
-  {
-    proofs[proof] = true;
-  }
+  // function storeProof(bytes32 proof)
+  // internal
+  // {
+  //   proofs[proof] = true;
+  // }
 
   // calculate and store the proof for a document
   /// @notice Notarize data of a document
   /// @dev This function burns a lot of gas. Consider calculate the hash offline then submit it using [addProof]
   /// @param document the content of the document
-  function notarize(string calldata document)
+  /// @return true if a new proof is stored, false if a proof already exist.
+  function notarize(string calldata name, bytes32 tags,
+    uint size, bytes32 contentType, string calldata document)
   external
+  returns (bool)
   {
     bytes32 proof = proofFor(document);
-    storeProof(proof);
-    emit Notarized(msg.sender, proof);
+    if (hasProof(proof)){
+      return false;
+    }
+
+    //store proof info. so later anyone can retrieve info abouta notarize file.
+    proofDocInfo[proof].name = name;
+    proofDocInfo[proof].tags = tags;
+    proofDocInfo[proof].time = now;
+    proofDocInfo[proof].size = size;
+    proofDocInfo[proof].contentType = contentType;
+    proofDocInfo[proof].creator = msg.sender;
+
+    //group all proofs belonged to a user together
+    acountProofs[msg.sender].push(proof);
+
+    emit Notarized(msg.sender, proof, proofDocInfo[proof].time, name, tags, size, contentType);
+    return true;
   }
 
   // helper function to get a document's keccak256
@@ -131,6 +162,14 @@ contract ProofOfExistence is Ownable {
   view
   returns(bool)
   {
-    return proofs[proof];
+    return proofDocInfo[proof].creator != address(0);
+  }
+
+  function getAllProofs()
+  external
+  view
+  returns(bytes32[] memory proofs)
+  {
+    return acountProofs[msg.sender];
   }
 }
