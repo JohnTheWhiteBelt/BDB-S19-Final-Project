@@ -4,7 +4,7 @@ All measures took to ensure that contracts are not susceptible to common attacks
 
 * **Re-entracy Attacks**
 
-    using withdrawal pattern to seperate accounting logic and the transfer logic.
+    ProofOfExistence.sol doesn't have any external calls so it's immune to this attack.
 
 * **Transaction Ordering and Timestamp Dependence**
     
@@ -12,11 +12,11 @@ All measures took to ensure that contracts are not susceptible to common attacks
 
 * **Integer Overflow and Underflow**
     
-    OpenZepplin SafeMath library is used.
+    No math calculation is used. So it's immune to this attack. 
 
 * **Denial of Service**
     
-    using withdrawal to avoid this attack.
+    ProofOfExistence.sol doesn't have any external calls so it's immune to this attack.
 
 * **Denial of Service by Block Gas Limit (or startGas)**
     

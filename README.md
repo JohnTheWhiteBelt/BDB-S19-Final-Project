@@ -3,10 +3,10 @@
 
 ## What does your project do?
 
-* Upload a picture/video to IPFS
-* Notarize a picture/video's existence.
-* Verify whether a picture/video is notarized before.
-* Show information about a notarized picture/video. Such as timestamp for notarization, file size, owner of the file.
+* Upload a picture/video(or any other file)
+* Notarize a file's existence.
+* Verify whether a file is notarized before.
+* Show information about a notarized file. Such as timestamp for notarization, file size, owner of the file.
 
 ## How to set it up?
 

@@ -24,7 +24,6 @@ contract("ProofOfExistence", function(accounts) {
     const proofOfExistence = await notarize();
     const proofs = await proofOfExistence.getAllProofs();
     const docInfo = await proofOfExistence.proofDocInfo(proofs[0]);
-    console.log(docInfo);
     assert.equal(docInfo.name, "a doc");
     assert.equal(web3.utils.hexToUtf8(docInfo.tags), "#test");
     assert.equal(docInfo.size, 432507);

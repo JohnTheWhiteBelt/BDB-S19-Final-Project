@@ -10,6 +10,5 @@ All design patterns used and identified for current project are listed below
     
     Disable critical contract functionality in case of an emergency.
 
-* **Withdrawal**
-    
-    Accounting logic and the transfer logic are seperated in ProofOfExistence.sol
+* **Fail Early and Fail Loud**
+    at line 111 ProofOfExistence.sol, when a file is Notarized already, revert right away. 

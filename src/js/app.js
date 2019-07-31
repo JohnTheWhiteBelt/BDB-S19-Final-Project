@@ -105,13 +105,14 @@ App = {
     const name = $('#fileName').text();
     const size = +$('#fileSize').text()
     const contentType = web3.utils.utf8ToHex($('#fileType').text());
-    const tags = web3.utils.utf8ToHex($('#fileTags').text());
+    const tags = web3.utils.utf8ToHex($('#fileTags').val());
 
     App.contracts.ProofOfExistence.methods.notarize(
       name, tags, size, contentType, App.currentDocument).send({
         from: web3.eth.defaultAccount
       }).then(
         result => {
+          console.log(result);
           return alert("Done!");
         },
         error => {
@@ -251,6 +252,8 @@ App = {
           $('#docType').text(web3.utils.hexToUtf8(docInfo.contentType));
           $('#docTags').text(web3.utils.hexToUtf8(docInfo.tags));
           $('#notarizedDate').text(new Date(docInfo.time * 1000));
+          $('#docOwner').text(docInfo.creator);
+          
       },
       error => {
         console.log(error);

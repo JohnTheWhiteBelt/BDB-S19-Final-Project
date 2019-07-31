@@ -108,7 +108,7 @@ contract ProofOfExistence is Ownable {
   {
     bytes32 proof = proofFor(document);
     if (hasProof(proof)){
-      return false;
+      revert("This document has been Notarized before!");
     }
 
     //store proof info. so later anyone can retrieve info abouta notarize file.
