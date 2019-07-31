@@ -158,9 +158,10 @@ App = {
 
   listNotarizations: function () {
     if(App.contracts.ProofOfExistence){
-      App.contracts.ProofOfExistence.methods.getAllProofs().call().then(
+      App.contracts.ProofOfExistence.methods.getAllProofs().call({from: web3.eth.defaultAccount}).then(
         proofs => {
-          if(!proofs){
+          if(!proofs || proofs.length === 0){
+            $('#notarizationList').text('');
             return;
           }
           $('#notarizationList').text('');
