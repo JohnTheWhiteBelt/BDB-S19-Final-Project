@@ -19,15 +19,13 @@ contract ProofOfExistence is Ownable {
     */
   event Unpaused(address account);
 
+  /// @dev event emitted when notarize is called and succeeded
   event Notarized(address indexed owner, bytes32 indexed proof, uint time,
   string name, bytes32 tags, uint size, bytes32 contentType);
 
   bool private _paused;
 
-  /// @notice Fetch details related to a proof/hash
-  /// @dev hash size is fixed to bytes32
-  /// @param rings The number of rings from dendrochronological sample
-  /// @return age in years, rounded up for partial years
+  /// @dev struct save file/doc details
   struct DocInfo {
     string name;
     bytes32 tags;
@@ -36,10 +34,11 @@ contract ProofOfExistence is Ownable {
     bytes32 contentType;
     address creator;
   }
-  // mapping (bytes32 => bool) public proofs;
 
+  /// @dev mapping store file/doc details per proof.
   mapping (bytes32 => DocInfo) public proofDocInfo;
 
+  /// @dev mapping store proofs owned per account.
   mapping (address => bytes32[]) public acountProofs;
 
   constructor () public {
@@ -85,21 +84,15 @@ contract ProofOfExistence is Ownable {
       emit Unpaused(msg.sender);
   }
 
-  // store a proof of existence in the contract state
-  /// @notice store a proof/hash
-  /// @dev hash size is fixed to bytes32
-  /// @param proof The bytes32 hash
-  // function storeProof(bytes32 proof)
-  // internal
-  // {
-  //   proofs[proof] = true;
-  // }
-
   // calculate and store the proof for a document
   /// @notice Notarize data of a document
   /// @dev This function burns a lot of gas. Consider calculate the hash offline then submit it using [addProof]
+  /// @param name the name of the document
+  /// @param tags the tags of the document
+  /// @param size the size of the document
+  /// @param contentType the content type of the document
   /// @param document the content of the document
-  /// @return true if a new proof is stored, false if a proof already exist.
+  /// @return true if a new proof is stored.
   function notarize(string calldata name, bytes32 tags,
     uint size, bytes32 contentType, string calldata document)
   external
@@ -155,7 +148,7 @@ contract ProofOfExistence is Ownable {
 
   // returns true if proof is stored
   /// @notice query a proof from storage
-  /// @dev ToDo
+
   /// @param proof a bytes32 hash
   /// @return boolean indicate whether the proof is stored or not
   function hasProof(bytes32 proof)
@@ -166,6 +159,8 @@ contract ProofOfExistence is Ownable {
     return proofDocInfo[proof].creator != address(0);
   }
 
+  /// @notice return all proofs done by current account
+  /// @return proofs a bytes32 array
   function getAllProofs()
   external
   view

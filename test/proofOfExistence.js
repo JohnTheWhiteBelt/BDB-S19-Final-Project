@@ -1,25 +1,23 @@
 var ProofOfExistence = artifacts.require("ProofOfExistence");
 
 contract("ProofOfExistence", function(accounts) {
+  //try deploy contract and check it's owner
   it("should deploy and set owner", async () => {
     const proofOfExistence = await ProofOfExistence.new();
 
     assert.equal(await proofOfExistence.owner(), accounts[0]);
   });
-
+  //call Notarize to Notarize a file
   it("should notarize a document and emit event", async () => {
     await notarize();
-
-    // const proofs = await proofOfExistence.getAllProofs();
-    // assert.equal(proofs.length, 1);
   });
-
+  //Fetch all notarized proof hashes back.
   it("should return all notarization proofs done by current account", async () => {
     const proofOfExistence = await notarize();
     const proofs = await proofOfExistence.getAllProofs();
     assert.equal(proofs.length, 1);
   });
-
+  //get details of a notarized file.
   it("should return information of a Notarized doc", async () => {
     const proofOfExistence = await notarize();
     const proofs = await proofOfExistence.getAllProofs();
@@ -30,7 +28,7 @@ contract("ProofOfExistence", function(accounts) {
     assert.equal(web3.utils.hexToUtf8(docInfo.contentType), "text");
     assert.equal(docInfo.creator, accounts[0]);
   });
-
+  //verify a file
   it("should verify a doc is notarized or not ", async () => {
     const proofOfExistence = await notarize();
     let success = await proofOfExistence.verify("This is the content of the doc");
