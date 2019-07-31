@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
   <title>Proof Of Existence</title>
-
   <!-- Bootstrap -->
   <link href="css/bootstrap.min.css" rel="stylesheet">
 
@@ -24,6 +23,7 @@
     <div class="row">
       <div class="col-xs-12 col-sm-8 col-sm-push-2">
         <h1 class="text-center">Proof Of Existence</h1>
+        <h4>Contract Status:<span id="contractStatus"></span></h4>
         <hr />
         <br />
       </div>
@@ -66,9 +66,9 @@
           <strong>Notarized Date</strong>: <span id="notarizedDate"></span><br />
           <strong>Tags</strong>: <span id="docTags"></span><br />
         </div>
+            <button class="btn btn-default" type="button" id="pause">Pause</button>
+            <button class="btn btn-default" type="button" id="unPause">UnPause</button>
       </div>
-    </div>
-    <div class="row">
     </div>
   </div>
 

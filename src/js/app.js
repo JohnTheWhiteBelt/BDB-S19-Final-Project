@@ -53,6 +53,9 @@ App = {
     $('#fileUpload').on('change', App.handleFiles);
     $('#notarize').on('click', App.notarize);
     $('#verify').on('click', App.verify);
+    $('#pause').on('click', App.pauseContarct);
+    $('#unPause').on('click', App.unPauseContarct);
+    
     App.updateCurrentAccount();
 
   },
@@ -147,6 +150,7 @@ App = {
       web3.eth.defaultAccount = acounts[0];
       $('#currentAccount').text(acounts[0]);
       App.listNotarizations();
+      App.checkContractStatus();
 
     });
     setTimeout(App.updateCurrentAccount, 5000);
@@ -171,6 +175,71 @@ App = {
           console.log(error);
         });
     }
+  },
+  checkContractStatus: function () {
+    if(App.contracts.ProofOfExistence){
+      App.contracts.ProofOfExistence.methods.paused().call().then(
+        paused => {
+          if(paused){
+            $('#contractStatus').text('Paused');
+            $('#pause').attr('disabled', true);
+            $('#unPause').attr('disabled', false);
+          }else {
+            $('#contractStatus').text('Not Paused');
+            $('#pause').attr('disabled', false);
+            $('#unPause').attr('disabled', true);
+          }
+        },
+        error => {
+          console.log(error);
+        });
+      }
+  },
+  pauseContarct: function() {
+    if(App.contracts.ProofOfExistence){
+      App.contracts.ProofOfExistence.methods.owner().call().then(
+        owner => {
+          if(owner === web3.eth.defaultAccount){
+            App.contracts.ProofOfExistence.methods.pause().send({
+                from: owner
+              }).then(
+                result => {
+                  return alert("Paused!");
+                },
+                error => {
+                  console.log(error);
+                });
+          }else {
+            alert("Only contract owner can Pause this contract!");
+          }
+        },
+        error => {
+          console.log(error);
+        });
+      }
+  },
+  unPauseContarct: function() {
+    if(App.contracts.ProofOfExistence){
+      App.contracts.ProofOfExistence.methods.owner().call().then(
+        owner => {
+          if(owner === web3.eth.defaultAccount){
+            App.contracts.ProofOfExistence.methods.unpause().send({
+                from: owner
+              }).then(
+                result => {
+                  return alert("Unpaused!");
+                },
+                error => {
+                  console.log(error);
+                });
+          }else {
+            alert("Only contract owner can UnPause this contract!");
+          }
+        },
+        error => {
+          console.log(error);
+        });
+      }
   },
   showDocInfo: function (proof) {
     if(App.contracts.ProofOfExistence){

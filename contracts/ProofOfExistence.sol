@@ -103,6 +103,7 @@ contract ProofOfExistence is Ownable {
   function notarize(string calldata name, bytes32 tags,
     uint size, bytes32 contentType, string calldata document)
   external
+  whenNotPaused
   returns (bool)
   {
     bytes32 proof = proofFor(document);
