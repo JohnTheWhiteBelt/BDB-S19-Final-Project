@@ -11,7 +11,7 @@
 ## How to set it up?
 
 * Install Node.js v10+ LTS and npm
-* Install Ganache in your browser
+* Install Ganache
 * Install MetaMask in your browser
 * Configure Ganache to use port 8545
 * Configure a network pointing to local Ganache at http://127.0.0.1:8545 in MetaMask
